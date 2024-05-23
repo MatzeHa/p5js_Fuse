@@ -20,10 +20,12 @@ var LOST = false;
 // GAME OBJECTS
 var enemy;
 var player;
+var polygons = [];
 
 function setup() {
 
     colorMode(HSB);
+    rectMode(CENTER);
 
     // GUI
     cnvs = createCanvas(canvas_w, canvas_h);
@@ -36,25 +38,40 @@ function setup() {
     // ENEMY
     enemy = new Enemy();
     player = new Player(canvas_w, canvas_h);
+    polygons = new Polygons();
+    polygons.initBorderPolygons(canvas_w, canvas_h);
 }
 
 function draw(){
-    background(0);
-    rectMode(CENTER);
 
+//    console.log(player.do_create_polygon);
+    console.log(player.lines);
+
+
+    if (LOST) return;
+
+
+    background(0);
+
+    // UPDATING GAME OBJECTS
     // SETTING COLORS OF ENEMY
-    
-    
-    if(!LOST) {       
-        if (frameCount > 360) frameCount = 0;
-        let new_hue = frameCount * 10 % 360;
-        enemy.update(color(new_hue, 100, 100));
-        player.update();
-        if (isPlayerEnemyCollision()) {
-            console.log("##################### COLLISION #######################");
-            LOST = true;
-        }
-    } 
+    if (frameCount > 360) frameCount = 0;
+    let new_hue = frameCount * 10 % 360;
+    enemy.update(color(new_hue, 100, 100));
+    player.update(polygons.polygons);
+
+    if (player.do_create_polygon) {
+        //console.log(player.lines);
+        let lns = player.getLines();
+        player.do_create_polygon = false;
+    }
+
+
+    if (isPlayerEnemyCollision()) {
+        console.log("##################### ENEMY COLLISION #######################");
+        LOST = true;
+    }
+
     // DRAW ENEMY    
     strokeWeight(2);
     enemy.lines.forEach(function(e_line, i) {
@@ -62,6 +79,20 @@ function draw(){
         line(e_line[0].x, e_line[0].y, e_line[1].x, e_line[1].y);
     });
         
+
+    // DRAW POLGYONS
+    polygons.polygons.forEach(pgon => {
+        strokeWeight(1);
+        stroke("green");
+        fill("grey");
+
+        beginShape(TESS);
+        pgon.forEach(v => {
+            vertex(v.x, v.y);
+        });
+        endShape(CLOSE);
+    });
+
     // DRAW PLAYER
     stroke("red");
     strokeWeight(10);
@@ -71,24 +102,6 @@ function draw(){
         strokeWeight(2);
         line(p_line[0].x, p_line[0].y, p_line[1].x, p_line[1].y);
     });
-    player.polygons.forEach(pgon => {
-        stroke("yellow");
-        fill("green");
-        beginShape(TESS);
-
-
-        console.log("XXX");
-        pgon.forEach(v => {
-            console.log(v)
-            vertex(v.x, v.y);
-        });
-        endShape();
-        
-
-        
-    });
-
-
 }
 
 
@@ -135,19 +148,19 @@ function linesIntersect(line1, line2) {
 
 
 function keyPressed(){
-    if (key == "w") {
+    if (key == "w" || keyCode == UP_ARROW) {
         console.log("UP");
         player.setDirection("UP");
 
-    } else if (key == "s") {
+    } else if (key == "s" || keyCode == DOWN_ARROW) {
         console.log("DOWN");
         player.setDirection("DOWN");
 
-    } else if (key == "a") {
+    } else if (key == "a" || keyCode == LEFT_ARROW) {
         console.log("LEFT");
         player.setDirection("LEFT");
         
-    } else if (key == "d") {
+    } else if (key == "d" || keyCode == RIGHT_ARROW) {
         console.log("RIGHT");
         player.setDirection("RIGHT");
 
