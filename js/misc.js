@@ -6,13 +6,11 @@ class Misc {
         dist(point.x, point.y, line[1].x, line[1].y);
         let line_length = dist(line[0].x, line[0].y, line[1].x, line[1].y);
         
-        if(dist_point_edges < line_length + 0.001){
+        if(dist_point_edges < line_length + 0.01){
             return true; 
         }
         return false;
     }
-
-
 
     static pointPolygonIntersect(point, polygon) {
         let collision = false;
